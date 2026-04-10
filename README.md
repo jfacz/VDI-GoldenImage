@@ -113,5 +113,3 @@ OsotShutdownAfterFinalize = $true
 ## License
 
 This project is licensed under the [MIT License](https://mit-license.org/).
-
-
