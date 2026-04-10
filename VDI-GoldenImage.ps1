@@ -14,7 +14,7 @@
                      Bug fixes and improvements
 [v2504.0 - 20250408] Added task to install/update Horizon Recording Agent
 [v2503.0 - 20250331] Full Support for Omnissa installer packages and configuration (version 2412 and later). Support for new FSLogix installer.
-                     New function Get-SwRegDetails() for getting details of installed software
+                     New function Get-SwRegDetail for getting details of installed software
                      Bug fixes and improvements
 [v2412.0 - 20241216] Removed task to install Microsoft Teams Classic (only New Microsoft Teams)
                      Default startup type of 'Optimize Drives' (defragsvc) service set to 'Manual' (because of FSLogix 'Disk Compaction' feature)
@@ -226,59 +226,59 @@ function InitEnvConfig{
     # Windows Update Registry Settings
     if($VarSet.ManageWindowsUpdates){
         $regPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
-        $regArr += AddItemReg $regPath "BranchReadinessLevel" "Dword" 16 32
-        $regArr += AddItemReg $regPath "DeferQualityUpdatesPeriodInDays" "Dword" 0 30
-        $regArr += AddItemReg $regPath "DisableWindowsUpdateAccess" "Dword" 0 1
-        $regArr += AddItemReg $regPath "DoNotConnectToWindowsUpdateInternetLocations" "Dword" 0 1
-        $regArr += AddItemReg $regPath "PauseFeatureUpdatesStartTime" "String" $("{0:yyyy-12-31}" -f (Get-Date)) "2021-10-15" 
-        $regArr += AddItemReg $regPath "PauseQualityUpdatesStartTime" "String" "2015-12-31" "2021-10-31"
-        $regArr += AddItemReg $regPath "SetDisableUXWUAccess" "Dword" 0 1
+        $regArr += AddItemReg -Path $regPath -Name "BranchReadinessLevel" -Type "Dword" -ValOn 16 -ValOff 32
+        $regArr += AddItemReg -Path $regPath -Name "DeferQualityUpdatesPeriodInDays" -Type "Dword" -ValOn 0 -ValOff 30
+        $regArr += AddItemReg -Path $regPath -Name "DisableWindowsUpdateAccess" -Type "Dword" -ValOn 0 -ValOff 1
+        $regArr += AddItemReg -Path $regPath -Name "DoNotConnectToWindowsUpdateInternetLocations" -Type "Dword" -ValOn 0 -ValOff 1
+        $regArr += AddItemReg -Path $regPath -Name "PauseFeatureUpdatesStartTime" -Type "String" -ValOn $("{0:yyyy-12-31}" -f (Get-Date)) -ValOff "2021-10-15" 
+        $regArr += AddItemReg -Path $regPath -Name "PauseQualityUpdatesStartTime" -Type "String" -ValOn "2015-12-31" -ValOff "2021-10-31"
+        $regArr += AddItemReg -Path $regPath -Name "SetDisableUXWUAccess" -Type "Dword" -ValOn 0 -ValOff 1
         $regPath += "\AU"
-        $regArr += AddItemReg $regPath "NoAutoUpdate" "Dword" 0 1
-        $regArr += AddItemReg $regPath "AllowMUUpdateService" "Dword" 1 -DeleteOff
-        $regArr += AddItemReg $regPath "AUOptions" "Dword" 4 -DeleteOff
-        $regArr += AddItemReg $regPath "ScheduledInstallDay" "Dword" 0 -DeleteOff
-        $regArr += AddItemReg $regPath "ScheduledInstallEveryWeek" "Dword" 1 -DeleteOff
-        $regArr += AddItemReg $regPath "ScheduledInstallTime" "Dword" 3 -DeleteOff
+        $regArr += AddItemReg -Path $regPath -Name "NoAutoUpdate" -Type "Dword" -ValOn 0 -ValOff 1
+        $regArr += AddItemReg -Path $regPath -Name "AllowMUUpdateService" -Type "Dword" -ValOn 1 -DeleteOff
+        $regArr += AddItemReg -Path $regPath -Name "AUOptions" -Type "Dword" -ValOn 4 -DeleteOff
+        $regArr += AddItemReg -Path $regPath -Name "ScheduledInstallDay" -Type "Dword" -ValOn 0 -DeleteOff
+        $regArr += AddItemReg -Path $regPath -Name "ScheduledInstallEveryWeek" -Type "Dword" -ValOn 1 -DeleteOff
+        $regArr += AddItemReg -Path $regPath -Name "ScheduledInstallTime" -Type "Dword" -ValOn 3 -DeleteOff
     }
     # Office Update Registry Settings
     if($VarSet.ManageOfficeUpdates){
         $regPath = "HKLM:\SOFTWARE\Policies\Microsoft\Office\16.0\Common\OfficeUpdate"
-        $regArr += AddItemReg $regPath "EnableAutomaticUpdates" "Dword" 1 0
-        $regArr += AddItemReg $regPath "HideEnableDisableUpdates" "Dword" 1 0
+        $regArr += AddItemReg -Path $regPath -Name "EnableAutomaticUpdates" -Type "Dword" -ValOn 1 -ValOff 0
+        $regArr += AddItemReg -Path $regPath -Name "HideEnableDisableUpdates" -Type "Dword" -ValOn 1 -ValOff 0
     }
     # Teams Update Registry Settings
     if($VarSet.MsTeamsDisableAutoUpdate){
         $regPath = "HKLM:\SOFTWARE\Microsoft\Teams"
-        $regArr += AddItemReg $regPath "disableAutoUpdate" "Dword" 0 1
+        $regArr += AddItemReg -Path $regPath -Name "disableAutoUpdate" -Type "Dword" -ValOn 0 -ValOff 1
     }
 
     # Windows Service Settings
     if($VarSet.ManageWindowsUpdates){
-        $svcArr += AddItemSvc "wuauserv" "Manual" "Start" "Disabled" "Stop"
-        $svcArr += AddItemSvc "UsoSvc" "Manual" "Start" "Disabled" "Stop"
-        $svcArr += AddItemSvc "StorSvc" "Automatic" "Start" "Manual" "Stop"
+        $svcArr += AddItemSvc -Name "wuauserv" -StartOn "Manual" -ActionOn "Start" -StartOff "Disabled" -ActionOff "Stop"
+        $svcArr += AddItemSvc -Name "UsoSvc" -StartOn "Manual" -ActionOn "Start" -StartOff "Disabled" -ActionOff "Stop"
+        $svcArr += AddItemSvc -Name "StorSvc" -StartOn "Automatic" -ActionOn "Start" -StartOff "Manual" -ActionOff "Stop"
         # AppVolumes services
         if($VarSet.AppVolManager.Count -gt 0){
-            $svcArr += AddItemSvc "svservice" "Disabled" "Stop" "Automatic" "Start"
-            $svcArr += AddItemSvc "svdriver" "Disabled" "Stop" "Automatic" "Start"
+            $svcArr += AddItemSvc -Name "svservice" -StartOn "Disabled" -ActionOn "Stop" -StartOff "Automatic" -ActionOff "Start"
+            $svcArr += AddItemSvc -Name "svdriver" -StartOn "Disabled" -ActionOn "Stop" -StartOff "Automatic" -ActionOff "Start"
         }
     }
     # MsEdge Update services
     if($VarSet.ManageMsEdgeUpdate){
-        $svcArr += AddItemSvc "edgeupdate" "Manual" "None" "Disabled" "Stop"
-        $svcArr += AddItemSvc "edgeupdatem" "Manual" "None" "Disabled" "Stop"
+        $svcArr += AddItemSvc -Name "edgeupdate" -StartOn "Manual" -ActionOn "None" -StartOff "Disabled" -ActionOff "Stop"
+        $svcArr += AddItemSvc -Name "edgeupdatem" -StartOn "Manual" -ActionOn "None" -StartOff "Disabled" -ActionOff "Stop"
     }
     # Google Update services
     if($VarSet.ManageGoogleUpdates){
-        $svcArr += AddItemSvc "GoogleUpdaterService*" "Manual" "None" "Disabled" "Stop"
-        $svcArr += AddItemSvc "GoogleUpdaterInternalService*" "Manual" "None" "Disabled" "Stop"
-        $svcArr += AddItemSvc "gupdate" "Manual" "None" "Disabled" "Stop"
-        $svcArr += AddItemSvc "gupdatem" "Manual" "None" "Disabled" "Stop"
+        $svcArr += AddItemSvc -Name "GoogleUpdaterService*" -StartOn "Manual" -ActionOn "None" -StartOff "Disabled" -ActionOff "Stop"
+        $svcArr += AddItemSvc -Name "GoogleUpdaterInternalService*" -StartOn "Manual" -ActionOn "None" -StartOff "Disabled" -ActionOff "Stop"
+        $svcArr += AddItemSvc -Name "gupdate" -StartOn "Manual" -ActionOn "None" -StartOff "Disabled" -ActionOff "Stop"
+        $svcArr += AddItemSvc -Name "gupdatem" -StartOn "Manual" -ActionOn "None" -StartOff "Disabled" -ActionOff "Stop"
     }
     # Adobe Update services
     if($VarSet.ManageAdobeUpdates){
-        $svcArr += AddItemSvc "AdobeARMservice" "Manual" "Start" "Disabled" "Stop"
+        $svcArr += AddItemSvc -Name "AdobeARMservice" -StartOn "Manual" -ActionOn "Start" -StartOff "Disabled" -ActionOff "Stop"
     }
 
     # Scheduled Tasks settings
@@ -578,7 +578,7 @@ function Get-SwNormalizedVersion {
 }
 
 # Getting Installed software details from uninstall registry
-function Get-SwRegDetails{
+function Get-SwRegDetail{
     param (
         [Parameter(Position=0, Mandatory=$true)] [string] $DisplayName,
         [ValidateSet("both","64bit","32bit")] [string] $regPath = "both"
@@ -694,7 +694,7 @@ Function SccmClearConfig{
         # Clear WMI Identity (Avoids duplicate IDs in SCCM console)
         $wmiPath = "root\ccm\invagt"
         MsgFce "Clearing SCCM identity in WMI ($($wmiPath))"
-        Get-WmiObject -Namespace $wmiPath -Class InventoryActionStatus -ErrorAction SilentlyContinue | Remove-WmiObject
+        Get-CimInstance -Namespace $wmiPath -ClassName InventoryActionStatus | Remove-CimInstance
         # Clear SCCM Cache
         $cachePath = Join-Path $Env:WinDir "ccmcache"
         if(Test-Path $cachePath){
@@ -740,7 +740,7 @@ function Invoke-VdiSoftwareInstall{
         }
 
         # Check current installation
-        $swInstalled = Get-SwRegDetails -DisplayName "*$($SwSettings.Name)*"
+        $swInstalled = Get-SwRegDetail -DisplayName "*$($SwSettings.Name)*"
         # Version comparison and installation
         if(!$swInstalled -or ($swInstalled.SystemVersion -lt $sourceVersion)){
             if($InstallType -ne "teams"){
